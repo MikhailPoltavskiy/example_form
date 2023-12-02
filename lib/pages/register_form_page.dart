@@ -7,8 +7,37 @@ import 'package:flutter/services.dart';
 import '../model/user.dart';
 import 'user_info_page.dart';
 
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: capitalize(newValue.text),
+      selection: newValue.selection,
+    );
+  }
+}
+
+String capitalize(String value) {
+  if (value.trim().isEmpty) return "";
+  return "${value[0].toUpperCase()}${value.substring(1).toLowerCase()}";
+}
+
+String _capitalizeWords(String text) {
+  if (text.isEmpty) {
+    return text;
+  }
+  List<String> words = text.split(' ');
+  for (int i = 0; i < words.length; i++) {
+    if (words[i].isNotEmpty) {
+      words[i] = words[i][0].toUpperCase() + words[i].substring(1);
+    }
+  }
+  return words.join(' ');
+}
+
 class RegisterFormPage extends StatefulWidget {
-  const RegisterFormPage({Key? key}) : super(key: key);
+  const RegisterFormPage({super.key});
 
   @override
   RegisterFormPageState createState() => RegisterFormPageState();
@@ -77,6 +106,27 @@ class RegisterFormPageState extends State<RegisterFormPage> {
                 _fieldFocusChange(context, _nameFocus, _phoneFocus);
               },
               controller: _nameController,
+
+              onChanged: (text) {
+                _nameController.value = _nameController.value.copyWith(
+                  text: _capitalizeWords(text),
+                  selection: TextSelection.collapsed(offset: text.length),
+                );
+              },
+
+              // onChanged: (value) {
+              //   _nameController.value = TextEditingValue(
+              //       // text: value.toUpperCase(),
+              //       text: value.trim().isEmpty
+              //           ? ""
+              //           : "${value[0].toUpperCase()}${value.substring(1).toLowerCase()}",
+              //       selection: _nameController.selection);
+              // },
+              // inputFormatters: <TextInputFormatter>[UpperCaseTextFormatter()],
+              // textCapitalization: TextCapitalization.sentences,
+              // autocorrect: false,
+              // keyboardType: TextInputType.name,
+              textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: 'Full Name *',
                 hintText: 'What do people call you?',
@@ -239,7 +289,8 @@ class RegisterFormPageState extends State<RegisterFormPage> {
               onPressed: _submitForm,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                textStyle: const TextStyle(color: Colors.white),
+                foregroundColor: Colors.white,
+                // textStyle: const TextStyle(color: Colors.white),
               ),
               child: const Text('Submit Form'),
             ),
